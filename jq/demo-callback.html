@@ -7,7 +7,12 @@
 <body>
 <script src="./jquery.js"></script>
 <script>
-  var cb = $.callbacks("once memory");
+  var cb = $.Callbacks("once memory");
+      cb.add(function(){
+          console.log('哈哈')
+      });
+      cb.fire();
+
 
 </script>
 </body>
