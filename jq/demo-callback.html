@@ -7,11 +7,17 @@
 <body>
 <script src="./jquery.js"></script>
 <script>
-  var cb = $.Callbacks("once memory");
+  var cb = $.callbacks("memory");
       cb.add(function(){
           console.log('哈哈11')
       });
+      cb.add(function(){
+          console.log('哈哈33331')
+      });
       cb.fire();
+      cb.add(function(){
+          console.log('哈哈222')
+      });
 
 
 </script>

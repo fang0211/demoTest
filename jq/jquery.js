@@ -1,6 +1,7 @@
 (function(root) {
     var rejectExp = /^<(\w+)\s*\/?>(?:<\/\1>|)$/;
-    var version = "1.0.1"
+    var version = "1.0.1";
+    var optionscache = {};
     var jQuery = function(selector,context) {
         return new jQuery.prototype.init(selector,context);
     }
@@ -118,7 +119,106 @@
             var parse = rejectExp.exec(data);
             //创建元素 返回一个element对象
             return [context.createElement(parse[1])]
+        },
+        callbacks: function(options){
+            options = typeof options === 'string' ? (optionscache[options] || createOptions(options)) : {};
+            var list = [];
+            var length,index,testing,start,starts,memory;
+            var fire = function (data) {
+                memory = options.memory && data;
+                index = starts || 0;
+                start = 0;
+                length = list.length;
+                testing = true;
+                for(;index<length;index++){
+                    if(list[index].apply(data[0],data[1]) === false && options.stopOnfalse){
+                        break;
+                    }
+                }
+            }
+            var self = {
+                add: function(){
+                    var args = Array.prototype.slice.call(arguments);
+                    start = list.length;
+                    args.forEach(function(fn){
+                        if(toString.call(fn) === '[object Function]'){
+                            list.push(fn)
+                        }
+                    });
+                    if(memory){
+                        starts = start;
+                        fire(memory)
+                    }
+                  return this
+                },
+                fireWith: function (context,arguments) {
+                    var args = [context,arguments];
+                    if(!options.once || !testing){
+                        fire(args);
+                    }
+                },
+                fire: function () {
+                    self.fireWith(this,arguments)
+                }
+            }
+            return self
+        },
+        //异步回调解决方案
+        Deferred: function(func){
+            //延迟对象的三种不同状态信息描述
+            //状态（操作变状态） 往队列中添加处理函数 创建队列 最终的状态描述
+            var tuples = [
+                ["resolve","done",jQuery.callbacks("once memory"),"resolved"],
+                ["reject" ,"fail",jQuery.callbacks("once memory"),"rejected"],
+                ["notify" ,"progress",jQuery.callbacks("memory")]
+            ];
+            state = "pending";//等待状态
+            promise = {
+                state: function(){
+                    return state
+                },
+                then: function(/* fnDone fnFail fnProgress*/){
+
+                },
+                promise: function(obj){
+                    return obj != null ? jQuery.extend(obj,promise) : promise;
+                }
+            }
+            //延迟对象 属性 方法
+            deferred = {}
+            tuples.forEach(function(tuple,i){
+                var list = tuple[2],//队列
+                    stateString = tuple[3];//最终状态
+
+                //promise [done | fail | progress] = list.add
+                promise[tuple[1]] = list.add;
+                //处理状态
+                if(stateString){
+                    list.add(function(){
+                        state = stateString
+                    })
+                }
+                //deferred[resolve | reject | notify]
+                deferred[tuple[0]] = function () {
+                    deferred[tuple[0]+"With"](this === deferred ? promise : this,arguments)
+                    return this
+                }
+                deferred[tuple[0]+"With"] = list.fireWith;
+            })
+            promise.promise(deferred)
+            return deferred;
+        },
+        //执行一个或者多个对象的延时对象的回调
+        when: function (subordinate) {debugger
+            return subordinate.promise();
         }
     });
+    function createOptions(options) {
+        var object = optionscache[options] = {};
+        options.split(/\s+/).forEach(function(value){
+            object[value] = true
+        });
+        return object;
+    }
     root.$ = root.jQuery = jQuery;
 })(this);

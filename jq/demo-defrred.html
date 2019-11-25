@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script src="jquery.js"></script>
+<script>
+ var wait = function () {
+     var der = $.Deferred();
+     var test = function () {
+         console.log('开始了');
+         der.resolve('text')
+     };
+     setTimeout(test,2000)
+     return der;
+ }
+ $.when(wait()).done(function (name) {
+     console.log(name);
+     console.log('执行成功')
+ }).fail(function(){
+     console.log('失败')
+ })
+</script>
+</body>
+</html>
