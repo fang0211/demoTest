@@ -13,7 +13,12 @@
 	function returnFalse() {
 		return false;
 	}
-
+	//activeElement 属性返回文档中当前获得焦点的元素。
+	function safeActiveElement() {
+		try {
+			return document.activeElement;
+		} catch (err) {}
+	}
     jQuery.fn = jQuery.prototype = {
         length: 0,
         jquery: version,
@@ -106,6 +111,9 @@
         isArray: function(obj){
             return toString.call(obj) === "[object Array]";
         },
+        isFunction: function(obj){
+            return toString.call(obj) === "[object Function]";
+        },
         //合并社数组
         merge: function (first,second) {
             var l = second.length,
@@ -149,6 +157,7 @@
                 start = 0;
                 length = list.length;
                 testing = true;
+                console.log('list',list);
                 for(;index<length;index++){
                     if(list[index].apply(data[0],data[1]) === false && options.stopOnfalse){
                         break;
@@ -158,7 +167,7 @@
             var self = {
                 add: function(){
                     var args = Array.prototype.slice.call(arguments);
-                    start = list.length;
+                    start = list.length;debugger
                     args.forEach(function(fn){
                         if(toString.call(fn) === '[object Function]'){
                             list.push(fn)
@@ -197,7 +206,22 @@
                     return state
                 },
                 then: function(/* fnDone fnFail fnProgress*/){
-
+                    var fns = [].slice.call(arguments)
+                    return jQuery.Deferred(function(newdefer){
+                        tuples.forEach(function(tuple,i){
+                            
+                            var fn = jQuery.isFunction(fns[i]) && fns[i];debugger
+                            deferred[tuple[1]](function(){
+                                console.log(11111)
+                                var returndefer= fn && fn.apply(this,arguments);
+                                if(returndefer && jQuery.isFunction(returndefer.promise)){
+                                    returndefer.done(newdefer.resolve)
+                                                .fail(newdefer.reject)
+                                                .progress(newdefer.notify)
+                                }
+                            })
+                        })
+                    }).promise();
                 },
                 promise: function(obj){
                     return obj != null ? jQuery.extend(obj,promise) : promise;
@@ -225,6 +249,9 @@
                 deferred[tuple[0]+"With"] = list.fireWith;
             })
             promise.promise(deferred)
+            if(func){
+                func.call(deferred,deferred)
+            }
             return deferred;
         },
         //执行一个或者多个对象的延时对象的回调
@@ -393,13 +420,13 @@
             load: {
                 noBubble: true
             },
-            focus: function(){
-                trigger: function(){
+            focus: {
+                trigger: function() {
                     if(this !== safeActiveElement() && this.focus){
                         this.focus();
                         return false
                     }
-                }
+                },
                delegateType: "focusin"
             },
             blur: {
@@ -483,6 +510,9 @@
             }
             while((cur = eventPath[i++])){
                 handle = (data_priv.get(cur,"events") || {})[event.type] && data_priv.get(cur,"handle")
+                if(handle){
+                    handle.apply(cur,data)
+                }
             }
         }
     })

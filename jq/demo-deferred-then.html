@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" >
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <script src="./jquery.js"></script>
+  <script>
+    var wait = function(src){
+      var der = jQuery.Deferred();
+      // setTimeout(function(){
+        der.resolve('第一个deferred');
+      // },1000)
+      
+      return der.promise()
+    }
+    wait().then(function(message){
+       console.log(message) 
+       var der = jQuery.Deferred();
+       der.resolve("又一个deferred对象");
+       return der.promise();
+    }).then(function(msg){
+      console.log(msg)
+    })
+  </script>
+</body>
+</html>
