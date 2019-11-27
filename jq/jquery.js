@@ -192,65 +192,79 @@
             return self
         },
         //异步回调解决方案
-        Deferred: function(func){
-            //延迟对象的三种不同状态信息描述
-            //状态（操作变状态） 往队列中添加处理函数 创建队列 最终的状态描述
+        Deferred: function(func) {
             var tuples = [
-                ["resolve","done",jQuery.callbacks("once memory"),"resolved"],
-                ["reject" ,"fail",jQuery.callbacks("once memory"),"rejected"],
-                ["notify" ,"progress",jQuery.callbacks("memory")]
-            ];
-            state = "pending";//等待状态
-            promise = {
-                state: function(){
-                    return state
-                },
-                then: function(/* fnDone fnFail fnProgress*/){
-                    var fns = [].slice.call(arguments)
-                    return jQuery.Deferred(function(newdefer){
-                        tuples.forEach(function(tuple,i){
-                            
-                            var fn = jQuery.isFunction(fns[i]) && fns[i];debugger
-                            deferred[tuple[1]](function(){
-                                console.log(11111)
-                                var returndefer= fn && fn.apply(this,arguments);
-                                if(returndefer && jQuery.isFunction(returndefer.promise)){
-                                    returndefer.done(newdefer.resolve)
-                                                .fail(newdefer.reject)
-                                                .progress(newdefer.notify)
-                                }
-                            })
-                        })
-                    }).promise();
-                },
-                promise: function(obj){
-                    return obj != null ? jQuery.extend(obj,promise) : promise;
-                }
-            }
-            //延迟对象 属性 方法
-            deferred = {}
-            tuples.forEach(function(tuple,i){
-                var list = tuple[2],//队列
-                    stateString = tuple[3];//最终状态
+                    ["resolve", "done", jQuery.callbacks("once memory"), "resolved"],
+                    ["reject", "fail", jQuery.callbacks("once memory"), "rejected"],
+                    ["notify", "progress", jQuery.callbacks("memory")]
+                ],
+                state = "pending",
+                //promise   权限分配  add   添加callback
+                promise = {
+                    state: function() {
+                        return state;
+                    },
+                    then: function( /* fnDone, fnFail, fnProgress */ ) {
+                        var fns = [].slice.call(arguments); //真正数组对象
+                        //创建一个Deferred 延迟对象  返回一个promise对象
+                        return jQuery.Deferred(function(newdefer) {
+                            tuples.forEach(function(tuple, i) {
+                                var fn = jQuery.isFunction(fns[i]) && fns[i];
+                                /*
+                                deferred   通过闭包去访问  此处链接式调用时指向的deferred对象
+                                newdefer   通过参数传递    指向新创建的deferred对象
+                                */
+                                //resolve  队列中的 callback
+                                deferred[tuple[1]](function() {debugger
+                                    var returndefer = fn && fn.apply(this, arguments);
+                                    // console.log('this',this)
+                                    if (returndefer && jQuery.isFunction(returndefer.promise)) {
+                                        //  console.log(newdefer);
+                                        //  console.log(newdefer.resolve);
+                                        returndefer.done(newdefer.resolve)
+                                            .fail(newdefer.reject)
+                                            .progress(newdefer.notify);
+                                    }
+                                });
 
-                //promise [done | fail | progress] = list.add
+                            })
+                        }).promise();
+                    },
+                    promise: function(obj) {
+                        return obj != null ? jQuery.extend(obj, promise) : promise;
+                    }
+                },
+                deferred = {};
+
+            tuples.forEach(function(tuple, i) {
+                var list = tuple[2],
+                    stateString = tuple[3];
+
+                // promise[ done | fail | progress ] = list.add
                 promise[tuple[1]] = list.add;
-                //处理状态
-                if(stateString){
-                    list.add(function(){
-                        state = stateString
-                    })
+
+                // Handle state
+                if (stateString) {
+                    list.add(function() {
+                        // state = [ resolved | rejected ]
+                        state = stateString;
+                    });
                 }
-                //deferred[resolve | reject | notify]
-                deferred[tuple[0]] = function () {
-                    deferred[tuple[0]+"With"](this === deferred ? promise : this,arguments)
-                    return this
-                }
-                deferred[tuple[0]+"With"] = list.fireWith;
-            })
-            promise.promise(deferred)
-            if(func){
-                func.call(deferred,deferred)
+
+                // deferred[ resolve | reject | notify ]  der.resolve("加载成功");
+                deferred[tuple[0]] = function() {
+                    deferred[tuple[0] + "With"](this === deferred ? promise : this, arguments);
+                    return this;
+                };
+                deferred[tuple[0] + "With"] = list.fireWith;
+            });
+
+            // Make the deferred a promise
+            promise.promise(deferred);
+
+            //新创建的deferred 对象
+            if (func) {
+                func.call(deferred, deferred);
             }
             return deferred;
         },
