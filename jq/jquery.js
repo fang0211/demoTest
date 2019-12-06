@@ -530,6 +530,93 @@
             }
         }
     })
+    jQuery.extend({
+        access: function(elems,callback,key,value){
+            var chain,cache,len = elems.length;
+            var testing = key ===undefined;
+            if(jQuery.isPlainObject(key)){
+                chain = true;
+                for(var item in key){
+                    jQuery.access(elems,callback,item,key[item])
+                }
+            }
+            if(value !== undefined){
+                chain = true;
+                if(testing){
+                    cache = callback;
+                    callback = function(key,value){
+                        cache.call(elems[i],value)
+                    }
+                }
+                for(var i=0;i<len;i++){
+                    callback.call(elems[i],key,value)
+                }
+            }
+            return chain ? elems : (testing ? callback.call(elems,value) : callback.call(elems[0],key,value) )
+        },
+        text: function(elem){
+            var textContent='';
+            for(var i=0;i<elem.length;i++){
+                var nodeType = elem[i].nodeType;
+                if(nodeType  === 1 || nodeType===9 || nodeType ===11){
+                    textContent += elem[i].textContent
+                }
+            }
+            return textContent
+        },
+        content: function(elem,value){
+            var nodeType = elem.nodeType;
+            if(nodeType  === 1 || nodeType===9 || nodeType ===11){
+                 elem.textContent = value;
+            }
+        },
+        style: function(elem,key ,value){
+            if (!elem || elem.nodeType === 3 || !elem.style) {
+				return;
+			}
+			elem.style[key] = value;
+        }
+    })
+    jQuery.fn.extend({
+        text: function(value){
+            return jQuery.access(this,function(value){
+                return value===undefined ? jQuery.text(this) : jQuery.content(this,value)
+            },null,value)
+        },
+        css: function(key,value){
+            return jQuery.access(this,function(key,value){
+                var CSSStyleDeclaration,len;
+                var map = {};
+                if(jQuery.isArray(key)){
+                    CSSStyleDeclaration = window.getComputedStyle(this);
+                    len = key.length;
+                    for(var i=0;i<len;i++){
+                        map[key[i]] = CSSStyleDeclaration.getPropertyValue(key[i])
+                    }
+                    return map;
+                }
+                 
+                return value===undefined ?  (window.getComputedStyle(this).getPropertyValue(
+					key) || undefined ): jQuery.style(this,key,value)
+            },key,value)
+        },
+        addClass: function(value){
+            var precess = typeof value === "string" && value;
+            var classes = (value || "").match(/\S+/g) || [];
+            var  len = this.length
+            for(var i=0;i<len;i++){
+                var elem = this[i];
+                var classs = elem.nodeType ===1 && elem.className ? " " +elem.className + " " : ""
+                var  j =0,cur;
+                while(cur = classes[j++]){
+                    if(classs.indexOf(" " + cur + " ")<0){
+                        classs += cur+ " ";
+                    }
+                }
+                elem.className = classs.trim();
+            }
+        }
+    })
 
     root.$ = root.jQuery = jQuery;
 })(this);

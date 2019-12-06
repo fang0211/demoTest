@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script src="underscore.js"></script>
+<script>
+//    console.log(_.unique([1,2,3,4,5,5]));//
+//    console.log(_.unique([1,2,3,4,"a","A"],function(value){
+//        return  typeof value === 'string' ? value.toLowerCase() : value
+//    }))
+//    console.log(_([1,2,3,4,4,5]))
+    console.log(_([1,2,3,4,4,5]).chain().unique().value())
+//    console.log(_([1,2,3,4,4,5]).chain())
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=<sct>, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<style>
+  .red{
+    color: red
+  }
+  .fz30{
+    font-size: 30px;
+  }
+</style>
+<body>
+  <div class="box">ok拉拉</div>
+  <script src="./jquery.js"></script>
+  <script>
+    $(".box").addClass("red fz30")
+    var object ={
+      arr: [1,2,3]
+    }
+    Object.defineProperty(object,'arr',{
+      get: function(){
+        return [1,2,3]
+        
+      },
+      set: function(){
+        console.log('set')
+      }
+    })
+    console.log(object.arr.push(3))
+  </script>
+</body>
+</html>
