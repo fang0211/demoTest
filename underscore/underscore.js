@@ -111,9 +111,34 @@
             return func.apply(this,args)
         }
     }
+    var Ctor = function(){}
+    var baseCreate = function (prototype) {
+        // if(!_.isObject(prototype)){
+        //     return {}
+        // }
+        // if(Object.create) return Object.create(prototype)
+        Ctor.prototype = prototype
+        var result = new Ctor;
+        Ctor.prototype = null
+        return result
+    }
+    _.isObject = function(obj){
+        return toString.call(obj) === '[object Object]'
+    }
     _.identify = function(value){
         return value
     }
+    var createReduce = function (dir) {
+        var reduce = function () {
+            
+        }
+        //memo 第一次累加的时候得初始值 || 数组数据中的下标为0的值
+        return function (obj,iteratee,memo,context) {
+            var init = arguments.length >=3;
+            return reduce(obj,optimizeCb(iteratee,context,4),memo,init)
+        }
+    }
+    _.reduce = createReduce(1)
     _.mixin = function(obj){
         _.each(_.function(obj),function(name){
             var func = obj[name];
