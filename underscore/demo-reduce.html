@@ -9,7 +9,10 @@
 <script>
     console.log(_.reduce([1,2,3,4,5,6],function (memo , value,index,obj) {
         return memo + value
-    },0))
+    }))
+    console.log(_.filter([12,30,1,0,50],function (elem) {
+        return elem <10
+    }))
 </script>
 </body>
 </html>

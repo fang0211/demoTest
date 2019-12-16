@@ -29,6 +29,12 @@
     _.isFunction = function (func) {
         return toString.call(func) === "[object Function]"
     }
+    _.isBoolean = function (bool) {
+        return toString.call(bool) === "[object Boolean]"
+    }
+    _.isNumber = function (bool) {
+        return toString.call(bool) === "[object Number]"
+    }
     _.each = function (target,callback) {
         var key , i=0;
         if(_.isArray(target)){
@@ -72,7 +78,7 @@
         return instance._chain ? _(obj).chain() : obj
     }
     var cb = function(interatee,context,count){
-        if(interatee === null){
+        if(interatee == null){
             return _.identify;
         }
         if(_.isFunction(interatee)){
@@ -91,6 +97,10 @@
             case 3:
                 return function (value,index,obj) {
                     return func.call(context,value,index,obj)
+                }
+            case 4:
+                return function (memo,value,index,obj) {
+                    return func.call(context,memo,value,index,obj)
                 }
         }
     }
@@ -129,8 +139,19 @@
         return value
     }
     var createReduce = function (dir) {
-        var reduce = function () {
-            
+        var reduce = function (obj,iteratee,memo,init) {
+            var keys = !_.isArray(obj) && Object.keys(obj),
+                length = (keys || obj).length,
+                index = dir > 0 ? 0 : length-1;
+            if(!init){
+                memo = obj[keys ? keys[index] : index]
+                index += dir
+            }
+            for(;index >= 0 && index <length ;index+=dir){
+                var currentKey = keys ? keys[index]: index
+                memo = iteratee(memo,obj[currentKey],currentKey,obj)
+            }
+            return memo
         }
         //memo 第一次累加的时候得初始值 || 数组数据中的下标为0的值
         return function (obj,iteratee,memo,context) {
@@ -139,6 +160,72 @@
         }
     }
     _.reduce = createReduce(1)
+    //predicate 真值检测（重点： 返回值）
+    _.filter = _.select = function (obj,predicate,context) {
+        var result = []
+        predicate = cb(predicate,context)
+        _.each(obj,function (value,index,list) {
+            if(predicate(value,index,list) ){
+                result.push(value)
+            }
+        })
+        return result
+    }
+    createIndexFinder = function (dir,predicateFind,sortedIndex) {
+        return function(array,item,idx){
+            //1-二分查找 2-特殊情况 3-正常循环
+            var length = array.length
+            var i =0;
+            if(sortedIndex && _.isBoolean(idx) && length){
+                var ind = sortedIndex(array,item)
+                return array[ind] === item ?ind : -1
+            }
+            if(item !== item){
+                var ind = predicateFind(slice.call(array,i,length),_.isNaN)
+                return ind
+            }
+            for(idx = dir > 0 ? i : length - 1; idx>=0 && idx<length; idx += dir){
+                if(array[idx] === item){
+                    return idx
+                }
+            }
+            return -1
+        }
+    }
+    _.isNaN = function (obj) {
+       return _.isNumber(obj) && obj !== obj
+    }
+    createPredicateIndexFinder = function (dir) {
+        return function (array,predicate,context) {
+            predicate = cb(predicate,context)
+            var length = array.length
+            var index = dir>0? 0: length-1
+            for(;index>=0 && index<length;index +=dir){
+                if(predicate(array[index],index,array)){
+                    return index
+                }
+            }
+            return -1
+        }
+    }
+    _.findIndex = createPredicateIndexFinder(1)
+    _.sortedIndex = function (array,obj,iteratee,context) {
+        iteratee = cb(iteratee,context,1)
+        var value = iteratee(obj)
+        var low = 0,
+            height = array.length;
+        while(low < height){
+            var mid = Math.floor((low+height)/2)
+            if(iteratee(array[mid])< value){
+               low = mid + 1
+            }else{
+                height = mid
+            }
+        }
+        return low
+    }
+    //_.findIndex 特殊情况的处理方案 NAN _.sortedIndex 针对排序的数组做二分查找
+    _.indexOf = createIndexFinder(1,_.findIndex,_.sortedIndex)
     _.mixin = function(obj){
         _.each(_.function(obj),function(name){
             var func = obj[name];
