@@ -226,6 +226,39 @@
     }
     //_.findIndex 特殊情况的处理方案 NAN _.sortedIndex 针对排序的数组做二分查找
     _.indexOf = createIndexFinder(1,_.findIndex,_.sortedIndex)
+
+    _.clone = function (obj) {
+        return  _.isArray(obj) ? obj.slice() : _.extend({},obj)
+    }
+    //抽样函数  10  11
+    _.sample = function (array,n) {
+        if(n== null){
+            return array[_.random(array.length-1)]
+        }
+        var sample = _.clone(array)
+        var length = sample.length
+        n = Math.max(Math.min(n,length),0)
+        for(var i=0;i<n;i++){
+            var rand = _.random(i,length-1)
+            var temp = sample[i];
+            sample[i] = sample[rand];
+            sample[rand] = temp
+        }
+        return sample.slice(0,n)
+
+    }
+    //返回一个[min,max]范围内的任意整数
+    _.random = function (min,max) {
+        if(max == null){
+            max = min;
+            min = 0
+        }
+        return min + Math.floor(Math.random()*(max-min+1))
+    }
+    // //返回乱序之后的数组副本
+    _.shuffle = function (array) {
+        return _.sample(array,Infinity)
+    }
     _.mixin = function(obj){
         _.each(_.function(obj),function(name){
             var func = obj[name];
