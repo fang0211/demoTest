@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script src="underscore.js"></script>
+<script>
+//    //深度展开
+//    console.log(_.flatten([1,[2,3],[4,5]]))
+//    //浅度展开
+//    console.log(_.flatten([1,[2,3],[4,[[4]]]]))
+    let arr = [1,2,3,4,5]
+    console.log(_.initial(arr,2))
+    console.log(arr)
+    console.log(_.rest([1,2,3,4,5],2))
+</script>
+</body>
+</html>
