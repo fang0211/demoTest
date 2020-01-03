@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script src="underscore.js"></script>
+<script>
+   /* _.delay(function (user,age) {
+        console.log(user)
+        console.log(age)
+    },500,"max",30)*/
+   function A(data) {
+       return data+2
+   }
+   function B(data) {
+       return data*3
+   }
+   function C(data) {
+       return data+1
+   }
+   var ret =  _.compose(C,A,B)
+    console.log(ret(3))
+</script>
+</body>
+</html>

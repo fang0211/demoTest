@@ -12,12 +12,25 @@
     _.prototype.value = function () {
         return this._wrapped;
     }
-    _.unique = function (arr, callback) {
+    _.unique = function (arr,isSorted, iteratee,context) {
+        if(!_.isBoolean(isSorted)){
+            context = iteratee
+            iteratee = isSorted
+            isSorted = false
+
+        }
+        if(iteratee != null){
+            iteratee = cb(iteratee,context)
+        }
         var ret = [];
+        var seen
         var target,i=0;
         for(;i<arr.length;i++){
-            var target = callback ? callback(arr[i]) : arr[i];
-            if(ret.indexOf(target) === -1){
+            var target = iteratee ? iteratee(arr[i],i,arr) : arr[i];
+            if(isSorted){
+                if(!i || target !== seen ) ret.push(target)
+                seen =  target
+            }else if(ret.indexOf(target) === -1){
                 ret.push(target)
             }
         }
@@ -290,9 +303,100 @@
     _.initial = function(array,n){
         return [].slice.call(array,0,Math.max(0,array.length-(n==null?1:n)))
     }
+    _.range = function (start,end,step) {
+       if(end == null){
+           end = start || 0
+           start = 0;
+
+       }
+        var ret =[]
+        step = step || 1
+        var length = Math.max(Math.ceil((end-start)/step),0)
+        var range = Array(length)
+        for(var i=0;i<length;i++,start+=step){
+            range[i] = start
+        }
+        return range
+    }
+    _.partial = function (func,num) {
+        var args = [].slice.call(arguments,1)
+        var bound = function () {
+            var index = 0;
+            var ret = []
+            for(var i=0;i<args.length;i++){
+                ret.push(args[i])
+            }
+            while(index < arguments.length){
+                args.push(arguments[index++])
+            }
+            return func.apply(this.args)
+        }
+        return bound
+    }
+    _.has = function (obj,key) {
+        return obj != null && hasOwnProperty.call(obj,key)
+    }
+    _.memoize = function (func,hasher) {
+       var memoize = function (key) {
+           var cache = memoize.cache
+           var address = '' + (hasher?hasher.apply(this,arguments): key)
+           if(!_.has(cache,address)){
+               cache[address] = func.apply(this,arguments)
+           }
+           return cache[address]
+       }
+       memoize.cache = {}
+       return memoize
+    }
+    _.delay = function (func,wait) {
+        var args = [].slice.call(arguments,2)
+        return setTimeout(function () {
+            func.apply(null,args)
+        },wait)
+    }
+    _.compose = function () {
+        var args = arguments
+        var end = args.length -1
+        return function () {
+            var index = end;
+            var ret = args[index].apply(null,arguments)
+            while(index--){
+                ret = args[index].call(null,ret)
+            }
+            return ret
+        }
+    }
+    var escapeMap = {
+        "<": "&lt;",
+        ">": "&gt;",
+        "&": "&amp;",
+        "'": "&apos;",
+        '"': "&quot;",
+    }
+    createEscaper = function () {
+        var source = Object.keys(escapeMap).join("|")
+        var textExp = new RegExp(source,"g")
+        var ret = function (match) {
+            return escapeMap[match]
+        }
+        return function (string) {
+            return textExp.test(string) ? string.replace(textExp,ret) : string
+        }
+    }
+    _.escape = createEscaper()
     //返回数组中除了第一个元素外的其他全部元素。传递 n 参数将返回从n开始的剩余所有元素
     _.rest = function (array,n) {
         return [].slice.call(array,(n==null ? 1: n))
+    }
+    /**
+     *，如果你在wait周期内调用任意次数的函数，都将尽快的被覆盖。
+     * 如果你想禁用第一次首先执行的话，传递{leading: false}，
+     * 还有如果你想禁用最后一次执行的话，传递{trailing: false}
+     */
+    _.throttle = function (func,wait,options) {
+        return function () {
+            
+        }
     }
     _.mixin = function(obj){
         _.each(_.function(obj),function(name){

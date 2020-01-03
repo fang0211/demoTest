@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    /**
+     * 用正则匹配把注释屏蔽掉
+     */
+    function fn( require, exports, module){
+        /*require("c.js")*/
+        var age = "30";
+        var b = require("b.js");
+        exports.age = age;
+    }
+
+    var str = fn.toString();
+    //匹配注释的正式 ，生成新字符串
+    var reg = "(/\\\*([^*]|[\\\r\\\n]|(\\\*+([^*/]|[\\\r\\\n])))*\\\*+/)|(//.*)";
+    var exp = new RegExp(reg,"g")
+    console.log('exp',exp)
+    var newStr = str.replace(exp,"")
+    var REQUIRE_RE = /\brequire\s*\(\s*(["'])(.+?)\1\s*\)/g;
+
+    newStr.replace(REQUIRE_RE, function(context ,m1 ,m2){
+        console.log(m2)  // => c.js  b.js
+    })
+
+</script>
+</body>
+</html>

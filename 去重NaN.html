@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    /**
+     * 思路：1.新建一个数组存储去重后的结果 2.先判断函数传入的是否数组参数；3.循环数组，判断数组元素是否是NaN
+     *
+     *eg:  var arr = [1,2,NaN,3,4,4,NaN,6,null]
+     *     uniqueNaN(arr)
+     *
+     */
+    var _isNaN = function (obj) {
+        return isNaN(obj) && obj !== obj
+    }
+    var _identify = function (value) {
+        return value
+    }
+    var optimizeCb = function (func,context) {
+        if(context == void 0){
+            return func
+        }
+    }
+    var cb = function (interatee,context) {
+        if(interatee == null){
+            return _identify
+        }
+        if(toString.call(interatee) === '[object Function]'){
+            return optimizeCb(interatee,context)
+        }
+    }
+    var createUniqueNaN = function (predicate) {
+        return function (arr) {
+            var ret = [];//存储返回数组
+            if (toString.call(arr) !== '[object Array]') {
+                throw new Error('传入参数有误')
+            }
+            predicate = cb(predicate);
+            arr.forEach(function(item) {
+                if(!predicate(item)){
+                    ret.push(item)
+                }
+            })
+            return ret;
+        }
+    }
+    var uniqueNaN = createUniqueNaN(_isNaN);
+</script>
+</body>
+</html>
