@@ -5,13 +5,15 @@
     <title>Title</title>
 </head>
 <body>
+<div style="height: 2000px;" onclick="throttled()"></div>
 <script src="underscore.js"></script>
+
 <script>
     //节流函数
     var throttled = _.throttle(function () {
         console.log('hello max')
-    },1500)
-    window.onscroll = throttled
+    },1500,{trailing: false})
+//    window.onscroll = throttled
 </script>
 </body>
 </html>

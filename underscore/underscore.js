@@ -1,5 +1,6 @@
 (function(root){
     var push = Array.prototype.push;
+
     var _ = function(obj){
         if(obj instanceof _){
             return obj
@@ -12,6 +13,7 @@
     _.prototype.value = function () {
         return this._wrapped;
     }
+    _.now = Date.now;
     _.unique = function (arr,isSorted, iteratee,context) {
         if(!_.isBoolean(isSorted)){
             context = iteratee
@@ -389,13 +391,41 @@
         return [].slice.call(array,(n==null ? 1: n))
     }
     /**
+     * 节流 两次执行时间大于time
      *，如果你在wait周期内调用任意次数的函数，都将尽快的被覆盖。
      * 如果你想禁用第一次首先执行的话，传递{leading: false}，
      * 还有如果你想禁用最后一次执行的话，传递{trailing: false}
      */
     _.throttle = function (func,wait,options) {
+        var lastTime = 0;
+        var timeout= null;
+        var args;
+        if(!options){
+            options = {}
+        }
+        var later = function(){
+            lastTime = _.now()
+            timeout = null;
+            func.apply(null,args)
+        }
         return function () {
-            
+            args = arguments
+            var now = _.now();
+            var remaining = wait-(now-lastTime)
+            if(!lastTime && options.leading === false){
+                lastTime = now;
+                return;
+            }
+            if(remaining<=0){
+                if(timeout){
+                    clearTimeout(timeout);
+                    timeout = null;
+                }
+                lastTime = now;
+                func.apply(null,args)
+            }else if(!timeout && options.trailing !== false){
+                timeout = setTimeout(later,remaining)
+            }
         }
     }
     _.mixin = function(obj){

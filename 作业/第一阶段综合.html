@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+//    var arr = [1,5,7,3,5]
+//    // 假设有一个数组，它的每一项都是整数，请你编写一个函数，找出数组中的最大值和最小值。
+//    function getMinAndMax(array) {
+//        //最后返回对象{min,max}
+//        var obj = {}
+//        if (toString.call(array) !== "[object Array]") {
+//            return obj
+//        }
+//        var min=array[0],max=array[0]
+//        array.forEach( function (item,index) {
+//            if (min>item) {
+//                min = item
+//            }
+//            if (max<item) {
+//                max = item
+//            }
+//        })
+//        return {
+//            max: max,
+//            min: min
+//        }
+//    }
+//    console.log(getMinAndMax(arr))
+
+//        使用正则实现密码校验功能。
+//        题目要求：密码长度6-12位，由数字、小写字符、大写字母组成，但必须至少包括2种字符。
+//    var reg = /(?!^[0-9]{6,12}$)(?!^[a-z]{6,12}$)(?!^[A-Z]{6,12}$)^[0-9A-Za-z]{6,12}$/
+//            ///(?!^[0-9]{6,12}$)(?!^[a-z]{6,12}$)(?!^[A-Z]{6,12}$)^[0-9A-Za-z]{6,12}$/
+//console.log( reg.test("1234567") ); // false 全是数字
+//console.log( reg.test("abcdef") ); // false 全是小写字母
+//console.log( reg.test("ABCDEFGH") ); // false 全是大写字母
+//console.log( reg.test("ab23C") ); // false 不足6位
+//console.log( reg.test("ABCDEF234") ); // true 大写字母和数字
+//console.log( reg.test("abcdEF234") ); // true 三者都有
+// 请问如何通过正则，将左边的整数每三位添加一个逗号（按数字的千位分隔符表示法显示）
+//    var reg = /(?!^)(?=(\d{3})+$)/g
+//              /(?!^)(?=(\d{3})+$)/g;
+//var string = '123456789'
+//    reg = /(?!^)(?=(\d{3})+$)/g;
+//var result = string.replace(reg, ',');
+//console.log(result)
+
+//如何实现数组的随机排序？请写出至少两种方法（说明思路并提交代码）。
+/**
+ * 洗牌算法
+ * 用Math.random()方法随机获取index，然后前后交互元素，达到乱序
+ */
+    function shuffle(array){
+        var newArr = array.concat();
+        var length = array.length;
+        for(var i=0;i<length;i++){
+            var index = Math.floor(Math.random()*length);
+            var temp = newArr[index];
+            newArr[index] = newArr[i];
+            newArr[i] = temp
+        }
+        return newArr
+    }
+    /**
+     * 遍历数组，生成随机索引，通过随机索引，把原数组中的值取出，放入新数组，
+     * 然后通过数组方法,Array.splice()删除原数组中的值，实现随机排序
+     */
+    function randSort(array){
+        var newArr = array.concat();
+        var mixedArray = [];
+        var length = newArr.length;
+        while(length>0){
+            var index = Math.floor(Math.random()*length);
+            mixedArray.push(newArr[index]);
+            newArr.splice(index,1)
+            length--;
+        }
+        return mixedArray
+    }
+</script>
+</body>
+</html>
